@@ -1,0 +1,60 @@
+Load the sleep data and ggplot library for the visualization:
+```{r}
+library(ggplot2)
+library(plyr)
+data(sleep)
+```
+Lets take a look on the sleep data:
+```{r}
+head(sleep)
+```
+What do we see? According to documentation: "Data which show the effect of two soporific drugs (increase in hours of sleep compared to control) on 10 patients.". The data meaning:
+
+[, 1]   extra	 numeric	 increase in hours of sleep
+[, 2]	 group	 factor	 drug given
+[, 3]	 ID	 factor	 patient ID
+
+We see that there has been compared exactly two drugs:
+
+```{r}
+length(unique(sleep$group))
+length(unique(sleep$ID))
+```
+
+That means that 10 patients did try 2 different drugs to lengthen their sleep period. Did their has been a difference in the effectiveness of th drugs?
+
+Lets take a look on the data:
+
+```{r}
+ggplot(data = sleep, aes(x = sleep$group, y = sleep$extra, group = sleep$ID,col=sleep$ID)) + geom_line()+ geom_point()
+```
+
+So it seems that the second drug did perform generally better. Lets take a deeper look on the difference between the effectiveness of the drugs:
+
+```{r}
+g1 <- sleep$extra[1 : 10]; g2 <- sleep$extra[11 : 20]
+difference <- g2 - g1
+mn <- mean(difference); s <- sd(difference); n <- 10
+
+mn
+s
+```
+
+So the mean of the difference of the groups of our sample is 1.58 with standard deviation of 1.23. What can wee say about the parameters of the population?We do now generally that the sample mean is normal-distributed around the population mean. But this does not help us. Why? Because we do not know the population mean nor the population standard deviation. 
+But what if we just the sample standard deviation? We change the distribution of sample means to the t distribution! So we can compute the t 95% confidence intervall by using the sample standard deviation and using the t-distribution. 
+
+Lets do it first by hand to understand the definition of the t confidence intervall:
+```{r}
+mn + c(-1, 1) * qt(.975, n-1) * s / sqrt(n)
+
+```
+
+We can also use built in R functions which can perform the so called t-testa and give us the sam result:
+```{r}
+t.test(difference)
+t.test(g2, g1, paired = TRUE)
+t.test(extra ~ I(relevel(group, 2)), paired = TRUE, data = sleep)
+```
+
+So: If we would repeat the sampling with the sample size of 10 and compute the 95% confidence intervall, then 95% of all the intervalls would contain the true population value. 
+What does this means for us? We can at least be confident that the population mean is higher than zero, which leads us to the conclusion that the second drug does outperform the first.
