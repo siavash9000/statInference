@@ -1,0 +1,39 @@
+---
+title: "ToothGrowth"
+output: html_document
+---
+
+What is the ToothGrowth data set? 
+
+```
+The Effect of Vitamin C on Tooth Growth in Guinea Pigs 
+
+Description
+
+The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
+
+Usage
+
+ToothGrowth
+Format
+
+A data frame with 60 observations on 3 variables.
+
+[,1]   len	 numeric	 Tooth length
+[,2]   supp	 factor      Supplement type (VC or OJ).
+[,3]   dose	 numeric	 Dose in milligrams.
+
+
+```
+Lets take look on the data:
+```{r}
+library(ggplot2)
+library(plyr)
+data(ToothGrowth)
+ggplot(ToothGrowth, aes(x=dose, y=len)) + geom_point(shape=2) + facet_grid(supp ~ .)
+ddply(ToothGrowth,dose~supp,function(x) c(mean=mean(x$len),sd=sd(x$len),observation_number=nrow(x)) )
+```
+
+The mean of the data samples is higher for small doses but nearly the same for the highest dose. 
+Is this also true for the real population?
+

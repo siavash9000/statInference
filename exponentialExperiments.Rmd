@@ -1,0 +1,29 @@
+First we create a thousand samples of size 40 of an exponentially distributed variable:
+```{r}
+samplesize = 40
+repitions = 1000
+lambda = 0.2
+samples = replicate(n = repitions,expr = mean(rexp(samplesize,lambda)))
+plot(samples)
+mean(samples)
+sd(samples)
+```
+The mean of this samples of size $n$ must be distributed normally with mean $\frac{1}{\lambda}$ and standard error $\frac{1}{\sqrt n * \lambda}$ due the central limit theorem. We first transform the data by $X_{T}=\frac{\overline X - \mu}{\sigma}*sqrt(n)$ .
+```{r} 
+transformed = sqrt(40)*(samples-5)/(1/lambda)
+library(ggplot2)
+ggplot() + geom_histogram(binwidth=0.1, colour="black", fill="white",aes(x=transformed,y = ..density..)) + geom_line(aes(x=seq(from=-4,to=4,length.out=repitions),y=dnorm(seq(from=-4,to=4,length.out=repitions))), colour="red")
+```
+
+We can see that $X_{T}$ has approximately a standard normal distribution. That means that the parameters predicted by the Central Limit Theorem match approximatly the observed data:
+
+1. The mean of our samples is `r mean(samples)`. The population mean is $\frac{1}{\lambda}=\frac{1}{0.2}=5$ .
+
+2. Our samples have a standard deviation of `r sd(samples)`. The standard deviation of the population is $\frac{1}{\sqrt n * \lambda}=\frac{1}{\sqrt 40 * 0.2}=0.79$.
+
+3. $\overline{X}$ is approximately normally distributed.
+
+Now lets determine the 95% Confidence Intervall.
+$\overline{X}\pm 1.96* \frac{S}{\sqrt n} = `r mean(samples)`\pm\frac{`r sd(samples)`}{`r sqrt(samplesize)`}$.
+
+The 95% Confidence Intervall of our samples is $[`r mean(samples)-sd(samples)/sqrt(samplesize)`,`r mean(samples)+sd(samples)/sqrt(samplesize)`]$.
