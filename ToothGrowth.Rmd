@@ -1,39 +1,49 @@
 ---
-title: "ToothGrowth"
 output: html_document
 ---
-
-What is the ToothGrowth data set? 
+What is the ToothGrowth data set? Lets take a look on (parts of) the documentation: 
 
 ```
 The Effect of Vitamin C on Tooth Growth in Guinea Pigs 
 
-Description
-
 The response is the length of odontoblasts (teeth) in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1, and 2 mg) with each of two delivery methods (orange juice or ascorbic acid).
-
-Usage
-
-ToothGrowth
-Format
 
 A data frame with 60 observations on 3 variables.
 
-[,1]   len	 numeric	 Tooth length
+[,1]   len   numeric	 Tooth length
 [,2]   supp	 factor      Supplement type (VC or OJ).
 [,3]   dose	 numeric	 Dose in milligrams.
-
-
 ```
-Lets take look on the data:
+Two obvious question arise. Do the means of the toothgrowth differ for the different dose levels and the different delivery methods? Lets take a look on the samples:  
 ```{r}
 library(ggplot2)
 library(plyr)
 data(ToothGrowth)
 ggplot(ToothGrowth, aes(x=dose, y=len)) + geom_point(shape=2) + facet_grid(supp ~ .)
-ddply(ToothGrowth,dose~supp,function(x) c(mean=mean(x$len),sd=sd(x$len),observation_number=nrow(x)) )
+means = ddply(ToothGrowth,dose~supp,function(x) c(mean=mean(x$len),sd=sd(x$len)))
 ```
+The mean of the toothgrowth increases for both delivery methods together with the dose of Vitamin C. The delivery via orange juice has higher means for the small doses (0.5mg and 1mg) but is nearly the same for the highest dose. Is this also true for the means in the real population? Lets take a look on the t-confidence intervalls for each delivery method. Lets first look at the delivery via ascorbic acid. 
+```{r}
+ascorbicAcid = ToothGrowth[ToothGrowth$supp=='VC',]
+ddply(ascorbicAcid,dose~supp,function(x) c(mean=mean(x$len),sd=sd(x$len),confidence.intervall=t.test(x$len)$conf.int))
+```
+We can see that the 95% confidence intervals for the different doses are pairwise disjoint. So we can conclude with high confidence that the means of the different doses are different. Moreover we can conclude that the means increase together with the doses.
+What is the case with orange juice as delivery method?
+```{r}
+orangeJuice = ToothGrowth[ToothGrowth$supp=='OJ',]
+ddply(orangeJuice,dose~supp,function(x) c(mean=mean(x$len),confidence.intervall=t.test(x$len)$conf.int))
+```
+The situation is similar for the orange juice case with the difference that the confidence intervalls for the doses 1mg and 2mg overlap. Lets perform an explicit hypothesis test for this doses:
+```{r}
+t.test(len~dose,paired=FALSE,var.equal=TRUE,data=orangeJuice[orangeJuice$dose %in% c(1.0,2.0),])
+```
+The t value of -2.248 is smaller than qt(.025, 18) = `r qt(.025, 18)`, so that we can conclude that the mean of the 2mg dose is bigger than the mean of the 1mg dose.
 
-The mean of the data samples is higher for small doses but nearly the same for the highest dose. 
-Is this also true for the real population?
-
+Now we should take a look on the differences between the delivery methods for each dose:
+```{r}
+ddply(ToothGrowth,dose~supp,function(x) c(mean=mean(x$len),confidence.intervall=t.test(x$len)$conf.int))
+```
+We see that the confidence intervalls are pairwise disjoint for the delivery methods, so that we can conclude with high confidence that the mean of the tooth growth is higher for orange juice for doses of 0.5mg and 1.0mg. But we can see that the intervalls for the 2.0mg doses overlap. Lets do a t.test to decide if the means are different:
+```{r}
+t.test(len~supp,paired=FALSE,var.equal=FALSE,data=ToothGrowth[ToothGrowth$dose==2.0,])
+```

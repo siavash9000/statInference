@@ -1,3 +1,6 @@
+---
+output: pdf_document
+---
 First we create a thousand samples of size 40 of an exponentially distributed variable:
 ```{r}
 samplesize = 40
@@ -19,11 +22,11 @@ We can see that $X_{T}$ has approximately a standard normal distribution. That m
 
 1. The mean of our samples is `r mean(samples)`. The population mean is $\frac{1}{\lambda}=\frac{1}{0.2}=5$ .
 
-2. Our samples have a standard deviation of `r sd(samples)`. The standard deviation of the population is $\frac{1}{\sqrt n * \lambda}=\frac{1}{\sqrt 40 * 0.2}=0.79$.
+2. Our samples have a standard deviation of `r sd(samples)`. The CTL predicts a standard deviation of $\frac{1}{\sqrt n * \lambda}=\frac{1}{\sqrt 40 * 0.2}=0.79$.
 
 3. $\overline{X}$ is approximately normally distributed.
 
 Now lets determine the 95% Confidence Intervall.
 $\overline{X}\pm 1.96* \frac{S}{\sqrt n} = `r mean(samples)`\pm\frac{`r sd(samples)`}{`r sqrt(samplesize)`}$.
 
-The 95% Confidence Intervall of our samples is $[`r mean(samples)-sd(samples)/sqrt(samplesize)`,`r mean(samples)+sd(samples)/sqrt(samplesize)`]$.
+4. The 95% Confidence Intervall of our samples is $[`r mean(samples)-sd(samples)/sqrt(samplesize)`,`r mean(samples)+sd(samples)/sqrt(samplesize)`]$.
